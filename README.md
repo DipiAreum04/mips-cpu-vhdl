@@ -28,37 +28,37 @@ The CPU is a single-cycle design: every instruction completes in one clock cycle
 ```
 
 ## Supported Instructions
-
-| Type | Instructions |
-|------|-------------|
-| R-type arithmetic | `add`, `sub`, `slt` |
-| R-type logical | `and`, `or`, `xor`, `nor` |
-| I-type arithmetic | `addi`, `slti`, `lui` |
-| I-type logical | `andi`, `ori`, `xori` |
-| Memory | `lw`, `sw` |
-| Branch | `beq`, `bne`, `bltz` |
-| Jump | `j`, `jr` |
+ 
+| Type | Category | Instructions |
+|------|----------|-------------|
+| R | Arithmetic | `add`, `sub`, `slt` |
+| R | Logical | `and`, `or`, `xor`, `nor` |
+| R | Jump Register | `jr` |
+| I | Arithmetic | `addi`, `slti`, `lui` |
+| I | Logical | `andi`, `ori`, `xori` |
+| I | Memory | `lw`, `sw` |
+| I | Branch | `beq`, `bne`, `bltz` |
+| J | Jump | `j` |
 
 ## File Structure
 
 ```
 ├── Code/
 │   ├── cpu.vhd           # Top-level entity: datapath + control unit
-│   ├── alu.vhd           # 32-bit ALU (add/sub, logic, slt)
+│   ├── alu.vhd           # 32-bit Arithemtic Logic Unit
 │   ├── regfile.vhd       # 32x32-bit register file (R0 hardwired to 0)
 │   ├── i_cache.vhd       # Instruction cache (32-location ROM)
 │   ├── d_cache.vhd       # Data cache (32-location synchronous RAM)
 │   ├── sign_extend.vhd   # Configurable sign/zero extension (4 modes)
 │   ├── next_address.vhd  # PC logic: PC+1, branch offset, jump, jr
 │   ├── pc_reg.vhd        # 32-bit PC register with async reset
-│   └── cpu.xdc           # Xilinx constraints (Nexys A7 pin mapping)
+│   └── cpu.xdc           # Xilinx constraints file (Nexys A7 pin mapping)
 ├── DO/
-│   └── cpu_labtest.do    # ModelSim simulation script
+│   └── cpu.do    # ModelSim simulation script
 ├── Vivado_Log_Files/
 │   ├── synth_runme.log   # Synthesis log
 │   └── impl_runme.log    # Implementation log
-└── Docs/
-    └── labtest_sim.pdf   # ModelSim simulation waveforms
+└── cpu_simulation.pdf       # ModelSim simulation waveforms
 ```
 
 ## Control Unit
@@ -68,15 +68,15 @@ The control unit is a purely combinational process that decodes the 6-bit opcode
 | Signal | Width | Function |
 |--------|-------|----------|
 | `reg_write` | 1-bit | Enable write to register file |
-| `reg_dst` | 1-bit | Write destination: `rt` (I-type) or `rd` (R-type) |
+| `reg_dst` | 1-bit | Write to destination register: `rt` (I-type) or `rd` (R-type) |
 | `reg_in_src` | 1-bit | Register write data: ALU result or memory |
 | `alu_src` | 1-bit | ALU second operand: `rt` or sign-extended immediate |
 | `add_sub` | 1-bit | ALU mode: addition or subtraction |
 | `data_write` | 1-bit | Enable write to data cache (`sw`) |
 | `logic_func` | 2-bit | ALU logical operation: AND / OR / XOR / NOR |
-| `func` | 2-bit | Sign-extension mode (LUI / arithmetic / logical) |
+| `func` | 2-bit | Sign-extension mode: LUI / arithmetic / logical |
 | `branch_type` | 2-bit | Branch condition: none / BEQ / BNE / BLTZ |
-| `pc_sel` | 2-bit | Next PC source: PC+1/branch / jump / jump-register |
+| `pc_sel` | 2-bit | Next PC source: PC+1 / branch / jump / jump-register |
 
 ## Simulation
 
@@ -100,7 +100,7 @@ done:
   xori r4, r4, 0x0000
 ```
 
-The simulation verifies all major instruction classes: ALU operations with and without immediate operands, memory access (`lw`/`sw`), conditional branches (`beq`), and unconditional jumps (`j`). Waveforms are included in [`labtest_sim.pdf`](labtest_sim.pdf).
+The simulation verifies all major instruction classes: ALU operations with and without immediate operands, memory access (`lw`/`sw`), conditional branches (`beq`), and unconditional jumps (`j`). Waveforms are included in [`cpu_simulation.pdf`](cpu_simulation.pdf).
 
 ## Build and Run
 
@@ -111,7 +111,7 @@ The simulation verifies all major instruction classes: ALU operations with and w
 source /CMC/ENVIRONMENT/modelsim.env
 ```
 
-**2. Create the work library and compile all VHDL files (in order from low-level to high-level):**
+**2. Create the work folder and compile all VHDL files (in order from low-level to high-level):**
 ```bash
 vlib work
 vcom Code/alu.vhd
@@ -126,10 +126,10 @@ vcom Code/cpu.vhd
 
 **3. Run the simulation using the provided DO file:**
 ```bash
-vsim -do DO/cpu_labtest.do cpu &
+vsim -do ../DO/cpu.do cpu &
 ```
 
-This loads the design and runs the test program defined in the I-cache. Use the Wave window to see the full waveform.
+This loads the design and runs the test program defined in the I-cache. Use the Wave window in Modelsim to see the full waveform.
 
 To re-run after modifying the I-cache or VHDL, recompile the changed file(s) with `vcom` and restart with `vsim`.
 
@@ -151,7 +151,7 @@ vivado &
 - Select **Create Project** → RTL Project
 - Add all `.vhd` files from `Code/` (target language: VHDL)
 - Add `Code/cpu.xdc` as the constraints file
-- Select part: **xc7a100tcsg324-1** (Artix-7, Nexys A7-100T)
+- Select FPGA board: **xc7a100tcsg324-1** (Artix-7, Nexys A7-100T)
 
 **4. Run the flow:**
 - **Run Synthesis** → **Run Implementation** → **Generate Bitstream**
@@ -164,7 +164,7 @@ vivado &
 
 | Signal | Board I/O |
 |--------|-----------|
-| `clk` | Slide switch |
+| `clk` | Push button |
 | `reset` | Slide switch |
 | `rs_out[3:0]` | LEDs |
 | `rt_out[3:0]` | LEDs |
@@ -180,4 +180,4 @@ Toggle the clock switch to step through instructions. Assert reset to restart ex
 - **HDL:** VHDL (IEEE std_logic_1164, std_logic_signed)
 - **Simulation:** ModelSim
 - **Synthesis & Implementation:** Xilinx Vivado
-- **FPGA:** Xilinx Nexys A7 (Artix-7)
+- **FPGA Board:** Xilinx Nexys A7 (Artix-7)
