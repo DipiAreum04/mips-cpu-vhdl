@@ -1,4 +1,4 @@
-# 32-bit MIPS CPU
+# MIPS CPU Design
 
 A single-cycle 32-bit MIPS CPU implemented in VHDL, synthesized and deployed on a Xilinx Nexys A7 FPGA. This project demonstrates hands-on knowledge of computer architecture, RTL design, combinational control logic, and hardware simulation and verification. It was built as part of the Computer Architecture and Design course at Concordia University. The design covers the full datapath and a combinational control unit supporting 20 MIPS instructions across R, I, and J formats.
 
