@@ -1,4 +1,4 @@
-# MIPS CPU Design
+# MIPS CPU
 
 A single-cycle 32-bit MIPS CPU implemented in VHDL, synthesized and deployed on a Xilinx Nexys A7 FPGA. This project demonstrates hands-on knowledge of computer architecture, RTL design, combinational control logic, and hardware simulation and verification. It was built as part of the Computer Architecture and Design course at Concordia University. The design covers the full datapath and a combinational control unit supporting 20 MIPS instructions across R, I, and J formats.
 
@@ -181,3 +181,14 @@ Toggle the clock switch to step through instructions. Assert reset to restart ex
 - **Simulation:** ModelSim
 - **Synthesis & Implementation:** Xilinx Vivado
 - **FPGA Board:** Xilinx Nexys A7 (Artix-7)
+
+## Author
+
+**Dipita Sinha**  
+Concordia University — Gina Cody School of Engineering and Computer Science  
+COEN 316 — Computer Architecture and Design
+
+
+## License
+
+Developed for academic purposes. Not licensed for commercial use.
